@@ -12,7 +12,7 @@ const basename = require('path').basename
 const HLRU = require('hashlru')
 const supportedEngines = ['ejs', 'nunjucks', 'pug', 'handlebars', 'marko', 'mustache', 'art-template', 'twig', 'liquid', 'dot']
 
-function fastifyView (fastify, opts, next) {
+function fastifyView(fastify, opts, next) {
   if (!opts.engine) {
     next(new Error('Missing engine'))
     return
@@ -72,8 +72,8 @@ function fastifyView (fastify, opts, next) {
 
     const promise = new Promise((resolve, reject) => {
       renderer.apply({
-        getHeader: () => { },
-        header: () => { },
+        getHeader: () => {},
+        header: () => {},
         send: result => {
           if (result instanceof Error) {
             reject(result)
@@ -98,7 +98,7 @@ function fastifyView (fastify, opts, next) {
     return this
   })
 
-  function getPage (page, extension) {
+  function getPage(page, extension) {
     if (viewExt) {
       return `${page}.${viewExt}`
     } else if (includeViewExtension) {
@@ -166,8 +166,8 @@ function fastifyView (fastify, opts, next) {
     }
   }
 
-  function readCallback (that, page, data) {
-    return function _readCallback (err, html) {
+  function readCallback(that, page, data) {
+    return function _readCallback(err, html) {
       if (err) {
         that.send(err)
         return
@@ -176,8 +176,12 @@ function fastifyView (fastify, opts, next) {
       let compiledPage
       try {
         options.filename = join(templatesDir, page)
-        if(type=='pug') compiledPage = engine.defualt.compile(html, options)
-        else compiledPage = engine.compile(html, options)
+        if (type == 'pug') {
+          compiledPage = engine.default.compile(html, options)
+        } else {
+          compiledPage = engine.compile(html, options)
+        }
+
       } catch (error) {
         that.send(error)
         return
@@ -200,7 +204,7 @@ function fastifyView (fastify, opts, next) {
     }
   }
 
-  function preProcessDot (templatesDir, options) {
+  function preProcessDot(templatesDir, options) {
     // Process all templates to in memory functions
     // https://github.com/olado/doT#security-considerations
     const destinationDir = options.destination || join(__dirname, 'out')
@@ -208,17 +212,17 @@ function fastifyView (fastify, opts, next) {
       mkdirSync(destinationDir)
     }
 
-    const renderer = engine.process(Object.assign(
-      {},
-      options,
-      {
+    const renderer = engine.process(Object.assign({},
+      options, {
         path: templatesDir,
         destination: destinationDir
       }
     ))
 
     // .jst files are compiled to .js files so we need to require them
-    for (const file of readdirSync(destinationDir, { withFileTypes: false })) {
+    for (const file of readdirSync(destinationDir, {
+        withFileTypes: false
+      })) {
       renderer[basename(file, '.js')] = require(resolve(join(destinationDir, file)))
     }
     if (Object.keys(renderer).length === 0) {
@@ -228,7 +232,7 @@ function fastifyView (fastify, opts, next) {
     return renderer
   }
 
-  function view (page, data) {
+  function view(page, data) {
     if (!page) {
       this.send(new Error('Missing page'))
       return
@@ -251,7 +255,7 @@ function fastifyView (fastify, opts, next) {
     readFile(join(templatesDir, page), 'utf8', readCallback(this, page, data))
   }
 
-  function viewEjs (page, data) {
+  function viewEjs(page, data) {
     if (!page) {
       this.send(new Error('Missing page'))
       return
@@ -276,7 +280,7 @@ function fastifyView (fastify, opts, next) {
     })
   }
 
-  function viewArtTemplate (page, data) {
+  function viewArtTemplate(page, data) {
     if (!page) {
       this.send(new Error('Missing page'))
       return
@@ -293,7 +297,7 @@ function fastifyView (fastify, opts, next) {
     // merge engine options
     const confs = Object.assign({}, defaultSetting, options)
 
-    function render (filename, data) {
+    function render(filename, data) {
       confs.filename = join(templatesDir, filename)
       const render = engine.compile(confs)
       return render(data)
@@ -310,7 +314,7 @@ function fastifyView (fastify, opts, next) {
     }
   }
 
-  function viewNunjucks (page, data) {
+  function viewNunjucks(page, data) {
     if (!page) {
       this.send(new Error('Missing page'))
       return
@@ -331,7 +335,7 @@ function fastifyView (fastify, opts, next) {
     })
   }
 
-  function viewMarko (page, data, opts) {
+  function viewMarko(page, data, opts) {
     if (!page) {
       this.send(new Error('Missing page'))
       return
@@ -353,8 +357,8 @@ function fastifyView (fastify, opts, next) {
       template.renderToString(data, send(this))
     }
 
-    function send (that) {
-      return function _send (err, html) {
+    function send(that) {
+      return function _send(err, html) {
         if (err) return that.send(err)
         if (options.useHtmlMinifier && (typeof options.useHtmlMinifier.minify === 'function')) {
           html = options.useHtmlMinifier.minify(html, options.htmlMinifierOptions || {})
@@ -364,7 +368,7 @@ function fastifyView (fastify, opts, next) {
     }
   }
 
-  function viewHandlebars (page, data) {
+  function viewHandlebars(page, data) {
     if (!page) {
       this.send(new Error('Missing page'))
       return
@@ -416,7 +420,7 @@ function fastifyView (fastify, opts, next) {
     })
   }
 
-  function viewMustache (page, data, opts) {
+  function viewMustache(page, data, opts) {
     if (!page) {
       this.send(new Error('Missing page'))
       return
@@ -446,7 +450,7 @@ function fastifyView (fastify, opts, next) {
     })
   }
 
-  function viewTwig (page, data, opts) {
+  function viewTwig(page, data, opts) {
     if (!page) {
       this.send(new Error('Missing page'))
       return
@@ -470,7 +474,7 @@ function fastifyView (fastify, opts, next) {
     })
   }
 
-  function viewLiquid (page, data, opts) {
+  function viewLiquid(page, data, opts) {
     if (!page) {
       this.send(new Error('Missing page'))
       return
@@ -493,8 +497,8 @@ function fastifyView (fastify, opts, next) {
       .catch(this.send)
   }
 
-  function viewDot (renderModule) {
-    return function _viewDot (page, data, opts) {
+  function viewDot(renderModule) {
+    return function _viewDot(page, data, opts) {
       if (!page) {
         this.send(new Error('Missing page'))
         return
@@ -526,20 +530,22 @@ function fastifyView (fastify, opts, next) {
     next()
   }
 
-  function withLayout (render) {
+  function withLayout(render) {
     if (layoutFileName) {
       return function (page, data, opts) {
         const that = this
 
         render.call({
-          getHeader: () => { },
-          header: () => { },
+          getHeader: () => {},
+          header: () => {},
           send: (result) => {
             if (result instanceof Error) {
               throw result
             }
 
-            data = Object.assign((data || {}), { body: result })
+            data = Object.assign((data || {}), {
+              body: result
+            })
 
             render.call(that, layoutFileName, data, opts)
           }
@@ -550,7 +556,7 @@ function fastifyView (fastify, opts, next) {
     return render
   }
 
-  function hasAccessToLayoutFile (fileName) {
+  function hasAccessToLayoutFile(fileName) {
     try {
       accessSync(join(templatesDir, getPage(fileName, 'hbs')))
 
@@ -561,4 +567,6 @@ function fastifyView (fastify, opts, next) {
   }
 }
 
-module.exports = fp(fastifyView, { fastify: '>=3.x' })
+module.exports = fp(fastifyView, {
+  fastify: '>=3.x'
+})
