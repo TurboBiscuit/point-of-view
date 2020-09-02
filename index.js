@@ -176,7 +176,8 @@ function fastifyView (fastify, opts, next) {
       let compiledPage
       try {
         options.filename = join(templatesDir, page)
-        compiledPage = engine.compile(html, options)
+        if(type=='pug') compiledPage = engine.defualt.compile(html, options)
+        else compiledPage = engine.compile(html, options)
       } catch (error) {
         that.send(error)
         return
